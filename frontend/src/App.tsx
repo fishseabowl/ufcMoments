@@ -1,56 +1,42 @@
-import React from 'react';
-import { DAppKitProvider } from "@vechain/dapp-kit-react";
-import { ChakraProvider, Container, Flex } from "@chakra-ui/react";
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import {
-  Dropzone,
-  Footer,
-  InfoCard,
-  Instructions,
-  Navbar,
-  SubmissionModal,
-  PostMomentForm // Ensure this import is correct, adjust the path as needed
-} from "./components";
-import { lightTheme } from "./theme";
-import { VITE_RECAPTCHA_V3_SITE_KEY } from "./env";
+  WalletButton,
+  useWallet,
+  useWalletModal,
+} from '@vechain/dapp-kit-react';
+import { useEffect, useState } from 'react';
 
-const App: React.FC = () => {
+function App() {
+  const { account } = useWallet();
+  const { open, onConnectionStatusChange } = useWalletModal();
+  const [buttonText, setButtonText] = useState('Connect Custom Button');
+
+  useEffect(() => {
+      const handleConnected = (address: string | null) => {
+          if (address) {
+              const formattedAddress = `${address.slice(
+                  0,
+                  6,
+              )}...${address.slice(-4)}`;
+              setButtonText(`Disconnect from ${formattedAddress}`);
+          } else {
+              setButtonText('Connect Custom Button');
+          }
+      };
+
+      handleConnected(account);
+
+      onConnectionStatusChange(handleConnected);
+  }, [account, onConnectionStatusChange]);
+
   return (
-    <GoogleReCaptchaProvider reCaptchaKey={VITE_RECAPTCHA_V3_SITE_KEY}>
-      <ChakraProvider theme={lightTheme}>
-        <DAppKitProvider
-          usePersistence
-          requireCertificate={false}
-          genesis="test"
-          nodeUrl="https://testnet.vechain.org/"
-          logLevel={"DEBUG"}
-        >
-          <Navbar />
-          <Flex flex={1}>
-            <Container
-              mt={{ base: 4, md: 10 }}
-              maxW={"container.xl"}
-              mb={{ base: 4, md: 10 }}
-              display={"flex"}
-              flex={1}
-              alignItems={"center"}
-              justifyContent={"flex-start"}
-              flexDirection={"column"}
-            >
-              <InfoCard />
-              <Instructions />
-              <Dropzone />
-              <PostMomentForm /> {/* Add your form here */}
-            </Container>
-          </Flex>
-          <Footer />
-
-          {/* MODALS  */}
-          <SubmissionModal />
-        </DAppKitProvider>
-      </ChakraProvider>
-    </GoogleReCaptchaProvider>
+      <div className="container">
+          <h2>React JS</h2>
+          <div className="label">kit button:</div>
+          <WalletButton />
+          <div className="label">custom button:</div>
+          <button onClick={open}>{buttonText}</button>
+      </div>
   );
-};
+}
 
 export default App;
