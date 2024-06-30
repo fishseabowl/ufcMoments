@@ -1,0 +1,1 @@
+export const VITE_RECAPTCHA_V3_SITE_KEY = process.env.REACT_APP_RECAPTCHA_V3_SITE_KEY as string;
